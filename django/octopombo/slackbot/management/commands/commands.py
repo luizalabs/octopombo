@@ -1,5 +1,5 @@
-from octopombo.api.models import Project
-from octopombo.api.handler import GithubProject
+from octopombo.slackbot.management.commands.handler import GithubProject
+from octopombo.slackbot.management.commands.models import Project
 
 
 class Command:
@@ -25,53 +25,56 @@ class Command:
     def add_repo(self, params):
         if 'help' in params:
             return 'Para adicionar repositorio chame da seguinte forma:\
-            ```@octopombo add-repo nome-do-repositorio label-de-aprovado```\
+            ```@octopombo add-repo repository-name approvals-number```\
             '
         try:
-            project = params[0]
-            approved_label = params[1]
+            data = {
+                'name': params[0],
+                'approvals_count': int(params[1])
+            }
             channel = params[2]
+            project = Project(channel)
 
-            if Project.objects.filter(channel=channel, name=project).exists():
+            if project.exists(data):
                 return """
-                    Pruu :pombo-nicolas: esse repositorio já foi adicionado antes.
+                    Pruu esse repositório já foi adicionado antes.
                 """
 
-            Project.objects.create(
-                name=project, channel=channel, approved_label=approved_label
-            )
-            return "Pruu pruu :pombo-nicolas: Respositorio adicionado com sucesso."
+            project.save(data)
+            return "Pruu pruu Repositório adicionado com sucesso."
         except Exception:
-            return 'Comando com parametros invalidos, digite `@octopombo add-repo help` para verificar como executar.'
+            return 'Comando com parametros inválidos, digite `@octopombo add-repo help` para verificar como executar.'
 
     def remove_repo(self, params):
         if 'help' in params:
-            return 'Para remover um repositorio, chame da seguinte forma:\
-            ```@octopombo remove-repo nome-do-repositorio```\
+            return 'Para remover um repositório, chame da seguinte forma:\
+            ```@octopombo remove-repo repository-name```\
             '
         try:
-            project = params[0]
+            name = params[0]
             channel = params[1]
+            project = Project(channel)
 
-            Project.objects.get(channel=channel, name=project).delete()
+            project.delete(name)
 
-            return "Pruu pruu :pombo-nicolas: Respositorio removido com sucesso."
+            return "Pruu pruu Respositório removido com sucesso."
         except Exception:
-            return 'Comando com parametros invalidos, digite `@octopombo remove-repo help` para verificar como executar.'
+            return 'Comando com parametros inválidos, digite `@octopombo remove-repo help` para verificar como executar.'
 
     def show_prs(self, params):
+        response = ["Não existe PR's em aberto! :clap: :tada: :gloria:"]
         if 'help' in params:
             return 'Para listar os prs em aberto chame da seguinte forma:\
             ```@Octopombo show-prs```\
             '
         try:
             prs = GithubProject(params[0]).get_pull_requests()
-
-            response = [
-                '\n{pr.url} - {pr.title}'.format(
-                    pr=pr
-                ) for pr in prs if pr.approved is False
-            ]
+            if prs:
+                response = [
+                    '\n{pr.url} - {pr.title}'.format(
+                        pr=pr
+                    ) for pr in prs if pr.approved is False
+                ]
 
             return ''.join(response)
 

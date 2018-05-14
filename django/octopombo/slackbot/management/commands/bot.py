@@ -1,12 +1,13 @@
 import time
 
+from django.conf import settings
 from slackclient import SlackClient
 from octopombo.slackbot.management.commands import event
 
 
 class Bot(object):
     def __init__(self):
-        self.slack_client = SlackClient('xoxb-2151854096-363730005895-JXskLncTrjdZMvP5Kp8qZc3A')
+        self.slack_client = SlackClient(settings.SLACK_CLIENT_TOKEN)
         self.bot_name = "octopombo"
         self.bot_id = self.get_bot_id()
 

@@ -3,7 +3,7 @@ from collections import namedtuple
 from django.conf import settings
 from github import Github
 
-from octopombo.api.models import Project
+from octopombo.slackbot.management.commands.models import Project
 
 
 class GithubProject:
@@ -12,6 +12,7 @@ class GithubProject:
         self.github = Github(settings.GITHUB_TOKEN)
         self.channel = channel
         self.company_name = settings.COMPANY_NAME
+        self.project = Project(self.channel)
 
     def get_pull_requests(self):
         repo = namedtuple(
@@ -39,30 +40,30 @@ class GithubProject:
 
         for project in projects:
             try:
-                repository = '/'.join([self.company_name, project.name])
+                repository = '/'.join([self.company_name, project])
                 repo = self.github.search_repositories(repository)
                 github_projects.append(repo[0])
             except Exception:
                 print(
-                    'Repositorio não encontrado, name:{}'.format(project.name)
+                    'Repositorio não encontrado, name:{}'.format(project)
                 )
 
         return github_projects
 
     def get_status(self, pr, repository):
         labels = pr.as_issue().labels
-        approved_label = self.get_approved_label(repository)
+        approvals_count = self.get_approvals_count(repository)
 
         if labels:
             for label in labels:
-                if self.has_request_changes(pr):
+                if self.has_request_changes(pr, approvals_count):
                     return False
-                if label.name in (approved_label, 'blocked'):
+                if label.name in ('approved', 'blocked'):
                     return True
 
         return False
 
-    def has_request_changes(self, pr):
+    def has_request_changes(self, pr, approvals_count):
         approves = []
         request_changes = []
         for review in pr.get_reviews():
@@ -78,12 +79,12 @@ class GithubProject:
             approves = list(set(approves))
             request_changes = list(set(request_changes))
 
-        if len(approves) > 2 and len(request_changes) == 0:
+        if len(approves) >= int(approvals_count) and len(request_changes) == 0:
             return False
         return True
 
-    def get_approved_label(self, repository):
-        return Project.get_approved_label(self.channel, repository)
+    def get_approvals_count(self, repository):
+        return self.project.get_approvals_count(repository)
 
     def get_projects(self):
-        return Project.get_projects_by_channel(self.channel)
+        return self.project.get_projects()
