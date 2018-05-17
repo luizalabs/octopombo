@@ -16,7 +16,7 @@ class GithubProject:
 
     def get_pull_requests(self):
         repo = namedtuple(
-            'Repositorio', ['url', 'title', 'user_name', 'approved']
+            'Repositorio', ['url', 'title', 'user_name', 'approved', 'repository_name']
         )
         repositories = self.get_repositories()
         pull_requests = []
@@ -28,7 +28,8 @@ class GithubProject:
                         url=pr.html_url,
                         title=pr.title,
                         user_name=pr.user.login,
-                        approved=self.get_status(pr, repository.name)
+                        approved=self.get_status(pr, repository.name),
+                        repository_name=repository.name
                     )
                 )
 
