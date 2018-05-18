@@ -63,7 +63,7 @@ class S3Manager:
     def get(self, filename):
         s3_bucket = self.client.Bucket(self.bucket).meta.client
         try:
-            downloaded_file = s3_bucket.download_file(
+            s3_bucket.download_file(
                 Bucket=self.bucket,
                 Key=filename,
                 Filename=filename

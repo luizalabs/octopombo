@@ -1,4 +1,3 @@
-import json
 from octopombo.aws.s3 import S3Manager
 
 
@@ -13,7 +12,7 @@ class Project:
         try:
             file_data = self.s3.get(self.filename)
             file_data.append(data)
-        except:
+        except Exception:
             file_data = [data]
         self.s3.upload(file_data, self.filename)
 
@@ -24,7 +23,7 @@ class Project:
                 if repo.get('name') == data.get('name'):
                     return True
             return False
-        except:
+        except Exception:
             return False
 
     def delete(self, project_name):
@@ -34,7 +33,7 @@ class Project:
                 if repo.get('name') == project_name:
                     file_data.remove(repo)
             self.s3.upload(file_data, self.filename)
-        except:
+        except Exception:
             print('Falha ao remover repositorio')
 
     def get_approvals_count(self, project_name):
@@ -43,7 +42,7 @@ class Project:
             for repo in file_data:
                 if repo.get('name') == project_name:
                     return repo.get('approvals_count')
-        except:
+        except Exception:
             print("Falha ao recuperar o arquivo")
 
     def get_projects(self):
@@ -52,7 +51,7 @@ class Project:
             file_data = self.s3.get(self.filename)
             for repo in file_data:
                 projects.append(repo.get('name'))
-        except:
+        except Exception:
             print("Falha ao recuperar o arquivo")
 
         return projects
