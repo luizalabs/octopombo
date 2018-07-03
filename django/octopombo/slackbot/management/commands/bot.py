@@ -2,6 +2,7 @@ import time
 
 from django.conf import settings
 from slackclient import SlackClient
+
 from octopombo.slackbot.management.commands import event
 
 
