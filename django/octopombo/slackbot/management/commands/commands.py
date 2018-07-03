@@ -12,6 +12,16 @@ class Command:
             'help': self.help
         }
 
+    def get_prs(self, params):
+        try:
+            prs = GithubProject(params[0]).get_pull_requests()
+            if prs:
+                return prs
+
+            return ["Não existe PR's em aberto! :clap: :tada: :gloria:"]
+        except Exception:
+            return 'Comando com parametros invalidos, digite `@octopombo show-prs help` para verificar como executar.'
+
     def handle_command(self, user, command, params=None):
         if command in self.commands:
             response = self.commands[command](params)
@@ -73,6 +83,7 @@ class Command:
             )
 
     def show_prs(self, params):
+
         response = ['Não existe PR\'s em aberto! :clap: :tada: :gloria:']
 
         if 'help' in params:
@@ -97,6 +108,46 @@ class Command:
                 'Comando com parametros invalidos, digite `@octopombo '
                 'show-prs help` para verificar como executar.'
             )
+
+        if 'resume' in params:
+            return self.show_resumed_prs([params[1]])
+
+        prs = self.get_prs(params)
+        response = [
+            '\n{pr.url} - {pr.title}'.format(
+                pr=pr
+            ) for pr in prs if pr.approved is False
+        ]
+
+        return ''.join(response)
+
+    def show_resumed_prs(self, params):
+        prs = self.get_prs(params)
+
+        repos = {}
+        for pr in prs:
+            if not pr.repository_name in repos and pr.approved is False:
+                repos[pr.repository_name] = 1
+            elif pr.approved is False:
+                repos[pr.repository_name] += 1
+
+        def emoji_translate(prs_quantity):
+            if prs_quantity <= 3:
+                return ':ok_hand:'
+            elif prs_quantity > 3 and prs_quantity <= 6:
+                return ':grey_exclamation:'
+            
+            return ':sos:'  
+
+        response = [
+            '\n{key} - open prs: {value} {emoji}'.format(
+                key=key.capitalize(),
+                value=value,
+                emoji=emoji_translate(value)
+            ) for key, value in repos.items()
+        ]
+
+        return ''.join(response)
 
     def help(self, *args):
         response = 'Comandos suportados no momento:\r\n```'
