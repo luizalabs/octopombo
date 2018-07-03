@@ -2,29 +2,48 @@
 
 Slack Bot para listagem de PR's em aberto nos repositórios cadastrados.
 
-## Instalação
+## Comandos
 
-1. Criar um virtualenv:
+### Adicionar um novo repositório
+```
+@octopombo add-repo nome-do-repo numero-de-approves
+```
 
-        virtualenv fry -p python3
-        
-2. Instalar dependências do Python, via `pip`:
+### Remover um repositório
+```
+@octopombo remove-repo nome-do-repo
+```
 
-        pip install -r requirements.txt
+### Mostrar os PR's em aberto
+```
+@octopombo show-prs
+```
+### Mostrar todos os comandos suportados no momento.
+```
+@octopombo help
+```
 
-## Deploy
 
-Os deploys de `staging` e `production` são feitos através da [Teresa](https://github.com/luizalabs/teresa-api).
+### Dev
 
-Variáveis de ambiente:
+Environment variable:
 
 ```
 AWS_ACCESS_KEY_ID
 AWS_SECRET_ACCESS_KEY
-DISABLE_COLLECTSTATIC
-DJANGO_SETTINGS_MODULE
 GITHUB_TOKEN
-SLACK_CLIENT_ID
-SLACK_CLIENT_SECRET
-SLACK_CLIENT_TOKEN
+SLACK_TOKEN
+OWNER
+```
+
+### Install Dependencies
+
+```
+ glide install
+ glide up
+```
+
+### Build
+```
+ go build .
 ```
