@@ -66,6 +66,7 @@ func respond(rtm *slack.RTM, msg *slack.MessageEvent, prefix string) {
 	acceptedPrs := map[string]bool{
 		"show-prs": true,
 		"show-pr":  true,
+		"show":     true,
 		"prs":      true,
 	}
 
@@ -85,26 +86,22 @@ func respond(rtm *slack.RTM, msg *slack.MessageEvent, prefix string) {
 		response = "Pruuuu buscando, aguarde um minuto..."
 		rtm.SendMessage(rtm.NewOutgoingMessage(response, msg.Channel))
 		response = ShowPullRequests(channelName)
-		rtm.SendMessage(rtm.NewOutgoingMessage(response, msg.Channel))
 
 	} else if acceptedAddrepos[text] {
 		args = strings.Split(args[2], " ")
 		if !(len(args) == 2) {
 			response = "Pruuu errou os argumentos"
-			rtm.SendMessage(rtm.NewOutgoingMessage(response, msg.Channel))
 		} else {
 			repo := args[0]
 			approvals, _ := strconv.Atoi(args[1])
 			response = AddRepository(channelName, repo, approvals)
-			rtm.SendMessage(rtm.NewOutgoingMessage(response, msg.Channel))
 		}
 
 	} else if acceptedRemoveRepos[text] {
 		response = RemoveRepository(channelName, args[2])
-		rtm.SendMessage(rtm.NewOutgoingMessage(response, msg.Channel))
 
 	} else {
 		response = "Pruu errou o comando. Comandos suportados no momento:```show-prs (optional) resume\nadd-repo name-of-repo number-of-approvals\nremove-repo name-of-repo\nhelp```"
-		rtm.SendMessage(rtm.NewOutgoingMessage(response, msg.Channel))
 	}
+	rtm.SendMessage(rtm.NewOutgoingMessage(response, msg.Channel))
 }
