@@ -32,5 +32,8 @@ func ShowPullRequests(channelName string) string {
 		fmt.Println("Error getting pull requests, error: ", err)
 		return "Ocorreu um erro ao buscar os pull requests :disappointed:"
 	}
+	if len(response) == 0 {
+		response = "Não há PR's para serem revisados! "
+	}
 	return response
 }
